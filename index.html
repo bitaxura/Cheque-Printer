@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Check Printer</title>
-
     <style>
         :root {
             --bg: #f6f6f4;
@@ -15,7 +12,6 @@
             --card: #fff;
             --bd: #d4d4d0;
             --ac: #1a5fb4;
-
             box-sizing: border-box;
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -79,7 +75,8 @@
             margin-bottom: 8px;
         }
 
-        input[type="text"] {
+        input[type=text],
+        input[type=date] {
             width: 100%;
             padding: 8px;
             border: 1px solid var(--bd);
@@ -89,7 +86,7 @@
             font: inherit;
         }
 
-        input[type="number"] {
+        input[type=number] {
             width: 78px;
             padding: 5px;
             border: 1px solid var(--bd);
@@ -182,6 +179,7 @@
         }
 
         @media print {
+
             html,
             body {
                 background: #fff !important;
@@ -193,7 +191,7 @@
                 padding: 0;
             }
 
-            main > *:not(.printwrap) {
+            main>*:not(.printwrap) {
                 display: none !important;
             }
 
@@ -224,30 +222,20 @@
 
 <body>
     <main>
-        <h1>
-            Check Printer
-            <span class="hint">7.25" × 3.25"</span>
-        </h1>
+        <h1>Check Printer <span class="hint">7.25" × 3.25"</span></h1>
 
         <div class="card">
             <div class="row">
-                <label>
-                    Pay to
+                <label>Pay to
                     <input type="text" id="payee" value="John Smith">
                 </label>
-
-                <label>
-                    Amount
-                    <input
-                        type="text"
-                        id="amount"
-                        value="1234.56"
-                        inputmode="decimal"
-                    >
+                <label>Amount
+                    <input type="text" id="amount" value="1234.56" inputmode="decimal">
                 </label>
-
-                <label>
-                    Memo
+                <label>Date
+                    <input type="date" id="date">
+                </label>
+                <label>Memo
                     <input type="text" id="memo">
                 </label>
             </div>
@@ -262,178 +250,89 @@
         <div class="card">
             <button id="print">Print check</button>
             <button class="sec" id="g">Toggle guide lines</button>
-
-            <label style="margin-top: 10px; display: inline-block">
-                <input type="checkbox" id="pg">
-                Include guide lines in print (for a plain-paper test)
+            <label style="margin-top: 10px; display: inline-block;">
+                <input type="checkbox" id="pg"> include guide lines in print (for a plain-paper test)
             </label>
-
-            <p class="hint">
-                In the print dialog set scale to 100% / Actual size,
-                margins None, and paper size to match your check.
-            </p>
+            <p class="hint">In the print dialog set scale to 100% / Actual size, margins None, and paper size to match
+                your check.</p>
         </div>
 
         <div class="card">
             <strong>Positions (inches from top-left of check)</strong>
-
-            <p class="hint">
-                Text sits just above the Y value (the line).
-                Nudge after a test print.
-            </p>
-
+            <p class="hint">Text sits just above the Y value (the line). Nudge after a test print.</p>
             <div class="scroll">
                 <table id="tb"></table>
             </div>
-
-            <p style="margin-top: 10px">
+            <p style="margin-top: 10px;">
                 Global shift:
                 X <input type="number" step="0.01" id="gx" value="0">
                 Y <input type="number" step="0.01" id="gy" value="0">
-
-                <button
-                    class="sec"
-                    id="reset"
-                    style="padding: 5px 10px"
-                >
-                    Reset
-                </button>
+                <button class="sec" id="reset" style="padding: 5px 10px;">Reset</button>
             </p>
         </div>
     </main>
 
     <script>
         var DEF = {
-            payee: {
-                x: 1,
-                y: 1 + 7 / 16,
-                label: "Pay to line (baseline)"
-            },
-            words: {
-                x: 1 / 4,
-                y: 1 + 13 / 16,
-                label: "Written amount line (baseline)"
-            },
-            amt: {
-                x: 5 + 11 / 16,
-                y: 1.25,
-                w: 1.25,
-                h: 0.3125,
-                label: "Amount box (left / top)"
-            },
-            memo: {
-                x: 0.5,
-                y: 2 + 9 / 16,
-                label: "Memo (baseline)"
-            }
+            payee: { x: 1, y: 1 + 7 / 16 - 2 / 25.4, label: "Pay to line (baseline)" },
+            words: { x: 1 / 4, y: 1 + 13 / 16 - 2 / 25.4, label: "Written amount line (baseline)" },
+            amt: { x: 5 + 11 / 16, y: 1.25, w: 1.25, h: 0.3125, label: "Amount box (left / top)" },
+            date: { x: 5 + 15.5 / 16 - 1 / 25.4, y: 0.75, w: 4 / 25.4, h: 5 / 25.4, label: "Date first box (left / top)" },
+            memo: { x: 0.5, y: 2 + 9 / 16, label: "Memo (baseline)" }
         };
 
         var P = JSON.parse(JSON.stringify(DEF));
 
         try {
-            var s = localStorage.getItem("chk2");
-
+            var s = localStorage.getItem("chk6");
             if (s) {
                 var o = JSON.parse(s);
-
                 for (var k in o) {
-                    if (P[k]) {
-                        Object.assign(P[k], o[k]);
-                    }
+                    if (P[k]) Object.assign(P[k], o[k]);
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
 
-        var gx = 0;
-        var gy = 0;
+        var gx = 0,
+            gy = 0,
+            GAP = 1;
 
         var $ = function (i) {
             return document.getElementById(i);
         };
 
-        var ones = [
-            "",
-            "one",
-            "two",
-            "three",
-            "four",
-            "five",
-            "six",
-            "seven",
-            "eight",
-            "nine",
-            "ten",
-            "eleven",
-            "twelve",
-            "thirteen",
-            "fourteen",
-            "fifteen",
-            "sixteen",
-            "seventeen",
-            "eighteen",
-            "nineteen"
-        ];
+        $("date").value = new Date().toLocaleDateString("en-CA");
 
-        var tens = [
-            "",
-            "",
-            "twenty",
-            "thirty",
-            "forty",
-            "fifty",
-            "sixty",
-            "seventy",
-            "eighty",
-            "ninety"
-        ];
+        var ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+        var tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 
         function below1000(n) {
             var s = "";
-
             if (n >= 100) {
                 s += ones[Math.floor(n / 100)] + " hundred";
                 n %= 100;
-
-                if (n) {
-                    s += " ";
-                }
+                if (n) s += " ";
             }
-
             if (n >= 20) {
                 s += tens[Math.floor(n / 10)];
-
-                if (n % 10) {
-                    s += "-" + ones[n % 10];
-                }
+                if (n % 10) s += "-" + ones[n % 10];
             } else if (n) {
                 s += ones[n];
             }
-
             return s;
         }
 
         function words(n) {
-            if (n === 0) {
-                return "zero";
-            }
-
-            var u = ["", "thousand", "million", "billion"];
-            var i = 0;
-            var out = [];
-
+            if (n === 0) return "zero";
+            var u = ["", "thousand", "million", "billion"],
+                i = 0,
+                out = [];
             while (n > 0) {
                 var c = n % 1000;
-
-                if (c) {
-                    out.unshift(
-                        below1000(c) + (u[i] ? " " + u[i] : "")
-                    );
-                }
-
+                if (c) out.unshift(below1000(c) + (u[i] ? " " + u[i] : ""));
                 n = Math.floor(n / 1000);
                 i++;
             }
-
             return out.join(" ");
         }
 
@@ -442,136 +341,96 @@
         }
 
         function render() {
-            var raw = parseFloat(
-                ($("amount").value || "").replace(/[$,]/g, "")
-            );
-
+            var raw = parseFloat(($("amount").value || "").replace(/[$,]/g, ""));
             var ok = !isNaN(raw) && raw >= 0 && raw < 1e12;
-            var cents = ok ? Math.round(raw * 100) : 0;
-            var d = Math.floor(cents / 100);
-            var c = cents % 100;
-
-            var num = ok
-                ? d.toLocaleString("en-US") + "." + (c < 10 ? "0" : "") + c
-                : "";
-
-            var wd = ok
-                ? cap(words(d)) + " and " + (c < 10 ? "0" : "") + c + "/100 ***"
-                : "";
-
+            var cents = ok ? Math.round(raw * 100) : 0,
+                d = Math.floor(cents / 100),
+                c = cents % 100;
+            var num = ok ? d.toLocaleString("en-US") + "." + (c < 10 ? "0" : "") + c : "";
+            var wd = ok ? cap(words(d)) + " and " + (c < 10 ? "0" : "") + c + "/100 ***" : "";
             var el = $("check");
             el.innerHTML = "";
 
             function add(p, txt, cls, extra) {
                 var e = document.createElement("div");
-
                 e.className = "f";
                 e.textContent = txt;
                 e.style.left = (p.x + gx) + "in";
                 e.style.top = (p.y + gy) + "in";
                 e.style.transform = "translateY(-100%)";
                 e.style.paddingBottom = "0.03in";
-
-                if (extra) {
-                    e.style.cssText += extra;
-                }
-
+                if (extra) e.style.cssText += extra;
                 el.appendChild(e);
             }
 
             add(P.payee, $("payee").value);
-            add(P.words, wd, 0, "font-size: 10.5pt");
-            add(P.memo, $("memo").value, 0, "font-size: 10.5pt");
+            add(P.words, wd, 0, "font-size:10.5pt");
+            add(P.memo, $("memo").value, 0, "font-size:10.5pt");
 
             var a = document.createElement("div");
-
             a.className = "f";
             a.textContent = num;
-            a.style.cssText +=
-                "left:" + (P.amt.x + gx) + "in;" +
-                "top:" + (P.amt.y + gy) + "in;" +
-                "width:" + P.amt.w + "in;" +
-                "height:" + P.amt.h + "in;" +
-                "display:flex;" +
-                "align-items:center;" +
-                "padding-left:0.08in;";
-
+            a.style.cssText += "left:" + (P.amt.x + gx) + "in;top:" + (P.amt.y + gy) + "in;width:" + P.amt.w + "in;height:" + P.amt.h + "in;display:flex;align-items:center;padding-left:0.08in";
             el.appendChild(a);
 
-            // Guide lines
+            var dv = $("date").value || "",
+                dg = dv.length >= 10 ? dv.slice(2, 4) + dv.slice(5, 7) + dv.slice(8, 10) : "";
+            var pitch = P.date.w + GAP / 25.4;
+
+            for (var i = 0; i < 6; i++) {
+                var db = document.createElement("div");
+                db.className = "f";
+                db.textContent = dg.charAt(i);
+                db.style.cssText += "left:" + (P.date.x + gx + i * pitch) + "in;top:" + (P.date.y + gy) + "in;width:" + P.date.w + "in;height:" + P.date.h + "in;display:flex;align-items:center;justify-content:center;font-size:9.5pt";
+                el.appendChild(db);
+
+                var bx = gl(P.date.x + i * pitch, P.date.y, P.date.w, P.date.h);
+                bx.style.borderWidth = "1px";
+                bx.style.borderColor = "#e33";
+                el.appendChild(bx);
+            }
+
+            // guides
             function gl(x, y, w, h) {
                 var g = document.createElement("div");
-
                 g.className = "guide";
-                g.style.cssText +=
-                    "left:" + (x + gx) + "in;" +
-                    "top:" + (y + gy) + "in;" +
-                    "width:" + w + "in;" +
-                    "height:" + h + "in;";
-
+                g.style.cssText += "left:" + (x + gx) + "in;top:" + (y + gy) + "in;width:" + w + "in;height:" + h + "in;";
                 return g;
             }
 
-            [
-                [P.payee, 4.25],
-                [P.words, 5.25]
-            ].forEach(function (a) {
+            [[P.payee, 4.25], [P.words, 5.25]].forEach(function (a) {
                 var g = gl(a[0].x, a[0].y, a[1], 0);
-
                 g.style.borderTopWidth = "1px";
                 g.style.borderColor = "#e33";
-
                 el.appendChild(g);
             });
 
             var b = gl(P.amt.x, P.amt.y, P.amt.w, P.amt.h);
-
             b.style.borderWidth = "1px";
             b.style.borderColor = "#e33";
-
             el.appendChild(b);
 
             var gm = gl(P.memo.x, P.memo.y, 3, 0);
-
             gm.style.borderTopWidth = "1px";
             gm.style.borderColor = "#e33";
-
             el.appendChild(gm);
         }
 
         function table() {
             var t = $("tb");
-
-            t.innerHTML =
-                "<tr>" +
-                "<th>Field</th>" +
-                "<th>X</th>" +
-                "<th>Y</th>" +
-                "</tr>";
+            t.innerHTML = "<tr><th>Field</th><th>X</th><th>Y</th></tr>";
 
             Object.keys(P).forEach(function (k) {
                 var r = document.createElement("tr");
-
-                r.innerHTML =
-                    "<td>" + P[k].label + "</td>" +
-                    "<td><input type=number step=0.01 data-k=" + k +
-                    " data-a=x value=" + P[k].x.toFixed(4) + "></td>" +
-                    "<td><input type=number step=0.01 data-k=" + k +
-                    " data-a=y value=" + P[k].y.toFixed(4) + "></td>";
-
+                r.innerHTML = "<td>" + P[k].label + "</td><td><input type=number step=0.01 data-k=" + k + " data-a=x value=" + P[k].x.toFixed(4) + "></td><td><input type=number step=0.01 data-k=" + k + " data-a=y value=" + P[k].y.toFixed(4) + "></td>";
                 t.appendChild(r);
             });
 
             t.querySelectorAll("input").forEach(function (i) {
                 i.oninput = function () {
                     var v = parseFloat(i.value);
-
-                    if (isNaN(v)) {
-                        return;
-                    }
-
+                    if (isNaN(v)) return;
                     P[i.dataset.k][i.dataset.a] = v;
-
                     save();
                     render();
                 };
@@ -580,11 +439,11 @@
 
         function save() {
             try {
-                localStorage.setItem("chk2", JSON.stringify(P));
-            } catch (e) {}
+                localStorage.setItem("chk6", JSON.stringify(P));
+            } catch (e) { }
         }
 
-        ["payee", "amount", "memo"].forEach(function (i) {
+        ["payee", "amount", "date", "memo"].forEach(function (i) {
             $(i).oninput = render;
         });
 
@@ -604,25 +463,20 @@
 
         $("reset").onclick = function () {
             P = JSON.parse(JSON.stringify(DEF));
-
             save();
             table();
             render();
         };
 
         $("print").onclick = function () {
-            document.body.classList.toggle(
-                "noprintguides",
-                !$("pg").checked
-            );
-
+            document.body.classList.toggle("noprintguides", !$("pg").checked);
             window.print();
         };
 
         document.body.classList.add("noprintguides");
-
         table();
         render();
     </script>
 </body>
+
 </html>
